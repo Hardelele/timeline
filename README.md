@@ -7,10 +7,24 @@ Interactive vertical timeline built with React + Konva featuring zoom and drag f
 ## Features
 
 - **Interactive Timeline**: Vertical timeline with smooth zoom and drag capabilities
-- **Time Scale**: Supports time intervals from seconds to millennia
+- **Time Scale**: Supports time intervals from seconds to millennia with automatic scaling
 - **Responsive Design**: Adapts to different screen sizes
 - **Smooth Animations**: Built with Konva for high-performance rendering
 - **Customizable**: Configurable props for styling and behavior
+
+## Time Scale Support
+
+The timeline supports an extensive range of time intervals:
+
+- **Seconds**: 1s, 2s, 5s, 10s, 15s, 20s, 30s
+- **Minutes**: 1min, 2min, 5min, 10min, 15min, 20min, 30min, 1h
+- **Hours**: 2h, 4h, 6h, 12h, 1 day
+- **Days**: 2 days, 1 week, 2 weeks, 1 month, 2 months, 3 months, 6 months, 1 year
+- **Years**: 2y, 5y, 10y, 25y, 50y, 1 century
+- **Centuries**: 2c, 5c, 1 millennium
+- **Millennia**: 2k, 5k, 10k years
+
+The timeline automatically switches between different time scales based on zoom level, providing optimal readability at any scale.
 
 ## Technology Stack
 

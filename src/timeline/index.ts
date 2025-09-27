@@ -3,4 +3,3 @@ export type { TimelineProps } from './Timeline';
 export { TimeScale } from './TimeScale';
 export { TimeDivision } from './TimeDivision';
 export { CoordinateAxes } from './CoordinateAxes';
-export { TimelineExamples } from './TimelineExamples';

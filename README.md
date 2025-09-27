@@ -2,7 +2,7 @@
 
 Interactive vertical timeline built with React + Konva featuring zoom and drag functionality.
 
-![Timeline Preview](assets/images/timeline-preview.png)
+![Timeline Preview](assets/images/image.png)
 
 ## Features
 

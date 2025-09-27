@@ -5,33 +5,33 @@ import { TimeScale } from './TimeScale';
 import { useTimeY } from '../hooks/useTimeY';
 
 export const CoordinateAxes: React.FC = () => {
-  // Получаем размеры и центр из сервиса
+  // Get dimensions and center from service
   const { width: canvasWidth, height: canvasHeight } = screenService.getCanvasSize();
   const { x: centerX } = screenService.getCenter();
   
-  // Хук для вычисления Y-координаты времени
+  // Hook for calculating time Y-coordinate
   const getTimeY = useTimeY();
   
-  // Y-координата нулевой точки времени
+  // Y-coordinate of zero time point
   const zeroTimeY = getTimeY(0);
 
   return (
     <>
-      {/* Ось X - горизонтальная линия */}
+      {/* X-axis - horizontal line */}
       <Line
         points={[0, zeroTimeY, canvasWidth, zeroTimeY]}
         stroke="#999"
         strokeWidth={0.5}
       />
       
-      {/* Ось Y - вертикальная линия */}
+      {/* Y-axis - vertical line */}
       <Line
         points={[centerX, 0, centerX, canvasHeight]}
         stroke="#999"
         strokeWidth={0.5}
       />
       
-      {/* Временная шкала с засечками */}
+      {/* Time scale with tick marks */}
       <TimeScale />
     </>
   );

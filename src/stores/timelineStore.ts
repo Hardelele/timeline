@@ -1,46 +1,46 @@
 import { create } from 'zustand';
 import { timeIntervalService, TimeInterval } from '../services/timeIntervalService';
 
-// Константы
-const DEFAULT_PIXELS_PER_DIVISION = 40; // пикселей на деление по умолчанию
+// Constants
+const DEFAULT_PIXELS_PER_DIVISION = 40; // default pixels per division
 
 interface TimelineState {
-  // Основные параметры таймлайна
-  offsetMs: number; // смещение в миллисекундах
-  pixelsPerDivision: number; // пикселей на деление (может быть 80, 40, и т.д.)
-  currentInterval: TimeInterval; // текущий временной интервал
+  // Main timeline parameters
+  offsetMs: number; // offset in milliseconds
+  pixelsPerDivision: number; // pixels per division (can be 80, 40, etc.)
+  currentInterval: TimeInterval; // current time interval
   
-  // Действия для изменения состояния
+  // Actions for state changes
   setOffsetMs: (offsetMs: number) => void;
   setPixelsPerDivision: (pixelsPerDivision: number) => void;
   setCurrentInterval: (interval: TimeInterval) => void;
   
-  // Действия для масштабирования
+  // Actions for zooming
   zoomIn: () => void;
   zoomOut: () => void;
-  smoothZoom: (deltaPixels: number) => void; // плавное масштабирование
+  smoothZoom: (deltaPixels: number) => void; // smooth zooming
   
-  // Вычисляемые значения
+  // Computed values
   getCurrentIntervalMs: () => number;
   getCurrentIntervalSeconds: () => number;
   getCurrentIntervalName: () => string;
-  getTimePerPixel: () => number; // миллисекунд на 1 пиксель
+  getTimePerPixel: () => number; // milliseconds per 1 pixel
   getScaledRadius: () => number;
   getScaledFontSize: () => number;
 }
 
 export const useTimelineStore = create<TimelineState>((set, get) => ({
-  // Начальные значения
-  offsetMs: 0, // смещение в миллисекундах
-  pixelsPerDivision: DEFAULT_PIXELS_PER_DIVISION, // пикселей на деление
-  currentInterval: TimeInterval.ONE_SECOND, // начинаем с 1 секунды
+  // Initial values
+  offsetMs: 0, // offset in milliseconds
+  pixelsPerDivision: DEFAULT_PIXELS_PER_DIVISION, // pixels per division
+  currentInterval: TimeInterval.ONE_SECOND, // start with 1 second
   
-  // Действия
+  // Actions
   setOffsetMs: (offsetMs) => set({ offsetMs }),
   setPixelsPerDivision: (pixelsPerDivision) => {
-    // Проверяем, нужно ли переключиться на другой интервал
+    // Check if need to switch to another interval
     if (timeIntervalService.shouldSwitchToNextInterval(pixelsPerDivision)) {
-      // Переключаемся на следующий интервал и сбрасываем пиксели на дефолтное значение
+      // Switch to next interval and reset pixels to default value
       if (timeIntervalService.switchToNextInterval()) {
         const newInterval = timeIntervalService.getCurrentInterval();
         set({ 
@@ -52,7 +52,7 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
     }
     
     if (timeIntervalService.shouldSwitchToPreviousInterval(pixelsPerDivision)) {
-      // Переключаемся на предыдущий интервал и сбрасываем пиксели на дефолтное значение
+      // Switch to previous interval and reset pixels to default value
       if (timeIntervalService.switchToPreviousInterval()) {
         const newInterval = timeIntervalService.getCurrentInterval();
         set({ 
@@ -63,7 +63,7 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
       }
     }
     
-    // Если переключения не произошло, просто обновляем пиксели
+    // If no switching occurred, just update pixels
     set({ pixelsPerDivision });
   },
   setCurrentInterval: (interval) => {
@@ -71,16 +71,16 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
     set({ currentInterval: interval });
   },
   
-  // Действия для масштабирования
+  // Actions for zooming
   zoomIn: () => {
     timeIntervalService.zoomIn();
     const newInterval = timeIntervalService.getCurrentInterval();
     const pixelsPerDivision = get().pixelsPerDivision;
     
-    // Обновляем текущий интервал в store
+    // Update current interval in store
     set({ currentInterval: newInterval });
     
-    // Если интервал стал меньше, можно увеличить пиксели на деление для лучшей читаемости
+    // If interval became smaller, can increase pixels per division for better readability
     if (newInterval < TimeInterval.ONE_SECOND && pixelsPerDivision > DEFAULT_PIXELS_PER_DIVISION) {
       set({ pixelsPerDivision: DEFAULT_PIXELS_PER_DIVISION });
     }
@@ -91,25 +91,25 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
     const newInterval = timeIntervalService.getCurrentInterval();
     const pixelsPerDivision = get().pixelsPerDivision;
     
-    // Обновляем текущий интервал в store
+    // Update current interval in store
     set({ currentInterval: newInterval });
     
-    // Если интервал стал больше, можно уменьшить пиксели на деление
+    // If interval became larger, can decrease pixels per division
     if (newInterval > TimeInterval.ONE_MINUTE && pixelsPerDivision < DEFAULT_PIXELS_PER_DIVISION) {
       set({ pixelsPerDivision: DEFAULT_PIXELS_PER_DIVISION });
     }
   },
 
-  // Плавное масштабирование (например, колесиком мыши)
+  // Smooth zooming (e.g., with mouse wheel)
   smoothZoom: (deltaPixels) => {
     const { pixelsPerDivision } = get();
     const newPixelsPerDivision = Math.max(10, Math.min(200, pixelsPerDivision + deltaPixels));
     
-    // Используем setPixelsPerDivision, который автоматически проверит переключение интервалов
+    // Use setPixelsPerDivision which will automatically check interval switching
     get().setPixelsPerDivision(newPixelsPerDivision);
   },
   
-  // Вычисляемые значения
+  // Computed values
   getCurrentIntervalMs: () => timeIntervalService.getCurrentIntervalMs(),
   getCurrentIntervalSeconds: () => timeIntervalService.getCurrentIntervalSeconds(),
   getCurrentIntervalName: () => timeIntervalService.getCurrentIntervalName(),
@@ -117,20 +117,20 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
   getTimePerPixel: () => {
     const { pixelsPerDivision } = get();
     const intervalMs = timeIntervalService.getCurrentIntervalMs();
-    return intervalMs / pixelsPerDivision; // миллисекунд на 1 пиксель
+    return intervalMs / pixelsPerDivision; // milliseconds per 1 pixel
   },
   
   getScaledRadius: () => {
     const timePerPixel = get().getTimePerPixel();
     const baseRadius = 5;
-    // Радиус зависит от масштаба времени
-    return Math.max(2, baseRadius * (1000 / timePerPixel)); // минимум 2px
+    // Radius depends on time scale
+    return Math.max(2, baseRadius * (1000 / timePerPixel)); // minimum 2px
   },
   
   getScaledFontSize: () => {
     const timePerPixel = get().getTimePerPixel();
     const baseFontSize = 14;
-    // Размер шрифта зависит от масштаба времени
-    return Math.max(10, baseFontSize * (1000 / timePerPixel)); // минимум 10px
+    // Font size depends on time scale
+    return Math.max(10, baseFontSize * (1000 / timePerPixel)); // minimum 10px
   },
 }));

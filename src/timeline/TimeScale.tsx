@@ -3,8 +3,8 @@ import { TimeDivision } from './TimeDivision';
 import { useTimeScale } from '../hooks/useTimeScale';
 
 /**
- * Компонент временной шкалы
- * Отображает деления времени с подписями
+ * Time scale component
+ * Displays time divisions with labels
  */
 export const TimeScale: React.FC = () => {
   const { divisions } = useTimeScale();

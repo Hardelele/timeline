@@ -2,8 +2,8 @@ import React from 'react';
 import { Timeline } from '../timeline';
 
 /**
- * Страница с таймлайном
- * Демонстрирует использование компонента Timeline на полный экран
+ * Timeline page
+ * Demonstrates full-screen usage of Timeline component
  */
 export const TimelinePage: React.FC = () => {
   return (

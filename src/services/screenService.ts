@@ -12,13 +12,13 @@ export class ScreenService {
     return ScreenService.instance;
   }
 
-  // Обновить размеры canvas
+  // Update canvas dimensions
   public updateCanvasSize(width: number, height: number): void {
     this.canvasWidth = width;
     this.canvasHeight = height;
   }
 
-  // Получить размеры canvas
+  // Get canvas dimensions
   public getCanvasSize(): { width: number; height: number } {
     return {
       width: this.canvasWidth,
@@ -26,7 +26,7 @@ export class ScreenService {
     };
   }
 
-  // Получить центр экрана
+  // Get screen center
   public getCenter(): { x: number; y: number } {
     return {
       x: this.canvasWidth / 2,
@@ -34,17 +34,17 @@ export class ScreenService {
     };
   }
 
-  // Получить ширину
+  // Get width
   public getWidth(): number {
     return this.canvasWidth;
   }
 
-  // Получить высоту
+  // Get height
   public getHeight(): number {
     return this.canvasHeight;
   }
 
-  // Вычислить Y-координату для временного деления
+  // Calculate Y-coordinate for time division
   public getTimeDivisionY(
     zeroTimeY: number,
     divisionIndex: number,
@@ -53,11 +53,11 @@ export class ScreenService {
     return zeroTimeY - divisionIndex * pixelsPerDivision;
   }
 
-  // Вычислить Y-координату нулевой точки времени
+  // Calculate Y-coordinate of zero time point
   public getZeroTimeY(centerY: number, offsetPixels: number): number {
     return centerY + offsetPixels;
   }
 }
 
-// Экспортируем singleton instance
+// Export singleton instance
 export const screenService = ScreenService.getInstance();

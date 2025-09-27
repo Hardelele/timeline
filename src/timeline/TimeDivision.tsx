@@ -17,7 +17,7 @@ export const TimeDivision: React.FC<TimeDivisionProps> = ({
 }) => {
   return (
     <>
-      {/* Текст с обозначением времени */}
+      {/* Text with time label */}
       <Text
         x={x + POSITIONING_CONSTANTS.TEXT_OFFSET_X}
         y={y + POSITIONING_CONSTANTS.TEXT_OFFSET_Y}
@@ -26,7 +26,7 @@ export const TimeDivision: React.FC<TimeDivisionProps> = ({
         fill="black"
       />
       
-      {/* Маленькая засечка */}
+      {/* Small tick mark */}
       <Line
         points={[
           x - POSITIONING_CONSTANTS.TICK_HALF_LENGTH, 

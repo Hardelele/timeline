@@ -7,29 +7,29 @@ import { dragService } from '../services/dragService';
 import { useTimelineStore } from '../stores/timelineStore';
 
 export interface TimelineProps {
-  /** Ширина компонента в пикселях */
+  /** Component width in pixels */
   width?: number;
-  /** Высота компонента в пикселях */
+  /** Component height in pixels */
   height?: number;
-  /** Фон компонента */
+  /** Component background color */
   backgroundColor?: string;
-  /** Обработчик изменения размера */
+  /** Resize handler */
   onResize?: (size: { width: number; height: number }) => void;
-  /** Обработчик изменения масштаба */
+  /** Zoom change handler */
   onZoom?: (zoomDelta: number) => void;
-  /** Обработчик изменения смещения */
+  /** Offset change handler */
   onOffsetChange?: (offsetMs: number) => void;
-  /** Показывать ли координатные оси */
+  /** Whether to show coordinate axes */
   showAxes?: boolean;
-  /** Показывать ли временную шкалу */
+  /** Whether to show time scale */
   showTimeScale?: boolean;
-  /** Кастомные стили для контейнера */
+  /** Custom styles for container */
   containerStyle?: React.CSSProperties;
 }
 
 /**
- * Переиспользуемый компонент таймлайна
- * Предоставляет интерактивную временную шкалу с возможностью масштабирования и перетаскивания
+ * Reusable timeline component
+ * Provides interactive timeline with zoom and drag capabilities
  */
 export const Timeline: React.FC<TimelineProps> = ({
   width,
@@ -54,7 +54,7 @@ export const Timeline: React.FC<TimelineProps> = ({
 
   const { smoothZoom, offsetMs } = useTimelineStore();
 
-  // Обновляем размеры canvas при изменении пропсов или размера окна
+  // Update canvas dimensions when props or window size changes
   useEffect(() => {
     const updateSize = () => {
       const newSize = {
@@ -65,42 +65,42 @@ export const Timeline: React.FC<TimelineProps> = ({
       screenService.updateCanvasSize(newSize.width, newSize.height);
       setCanvasSize(newSize);
       
-      // Уведомляем родительский компонент об изменении размера
+      // Notify parent component about size change
       onResize?.(newSize);
     };
 
     updateSize();
     
-    // Добавляем слушатель только если размеры не заданы явно
+    // Add listener only if dimensions are not explicitly set
     if (!width || !height) {
       window.addEventListener('resize', updateSize);
       return () => window.removeEventListener('resize', updateSize);
     }
   }, [width, height, onResize]);
 
-  // Настраиваем отслеживание состояния перетаскивания
+  // Setup drag state tracking
   useEffect(() => {
     dragService.setOnDragStateChange(setIsDragging);
   }, []);
 
-  // Уведомляем родительский компонент об изменении смещения
+  // Notify parent component about offset change
   useEffect(() => {
     onOffsetChange?.(offsetMs);
   }, [offsetMs, onOffsetChange]);
 
-  // Обработчик колесика мыши для масштабирования
+  // Mouse wheel handler for zooming
   const handleWheel = (e: any) => {
     e.evt.preventDefault();
     const deltaY = e.evt.deltaY;
-    const zoomDelta = deltaY > 0 ? -5 : 5; // Инвертируем для естественного зума
+    const zoomDelta = deltaY > 0 ? -5 : 5; // Invert for natural zoom
     
     smoothZoom(zoomDelta);
     
-    // Уведомляем родительский компонент о масштабировании
+    // Notify parent component about zoom
     onZoom?.(zoomDelta);
   };
 
-  // Стили для контейнера
+  // Container styles
   const containerStyles: React.CSSProperties = {
     width: canvasSize.width,
     height: canvasSize.height,

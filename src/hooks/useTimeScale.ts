@@ -6,8 +6,8 @@ import { useTimeY } from './useTimeY';
 import { TIME_SCALE_CONSTANTS } from '../constants/timeScaleConstants';
 
 /**
- * Хук для работы с временной шкалой
- * Инкапсулирует логику поиска ближайших делений и их рендеринга
+ * Hook for working with time scale
+ * Encapsulates logic for finding nearest divisions and their rendering
  */
 export const useTimeScale = () => {
   const {
@@ -16,14 +16,14 @@ export const useTimeScale = () => {
     getCurrentIntervalMs
   } = useTimelineStore();
 
-  // Получаем центр экрана
+  // Get screen center
   const { x: centerX } = screenService.getCenter();
   
-  // Хук для вычисления Y-координаты времени
+  // Hook for calculating time Y-coordinate
   const getTimeY = useTimeY();
 
   /**
-   * Находит ближайшую засечку к offsetMs
+   * Finds nearest tick mark to offsetMs
    */
   const findNearestDivision = useCallback(() => {
     const intervalMs = getCurrentIntervalMs();
@@ -32,20 +32,20 @@ export const useTimeScale = () => {
   }, [offsetMs, getCurrentIntervalMs]);
 
   /**
-   * Форматирует время для отображения
+   * Formats time for display
    */
   const formatTime = useCallback((timeMs: number): string => {
     return timeIntervalService.formatTime(timeMs);
   }, []);
 
   /**
-   * Вычисляет количество делений для отображения
+   * Calculates number of divisions to display
    */
   const getDivisionsCount = useCallback(() => {
     const { height } = screenService.getCanvasSize();
     const divisionsInHalf = Math.floor(height / TIME_SCALE_CONSTANTS.DIVISIONS_CALCULATION_FACTOR / pixelsPerDivision);
     
-    // Ограничиваем количество делений для производительности
+    // Limit number of divisions for performance
     return Math.max(
       TIME_SCALE_CONSTANTS.MIN_DIVISIONS_IN_HALF,
       Math.min(divisionsInHalf, TIME_SCALE_CONSTANTS.MAX_DIVISIONS_IN_HALF)
@@ -53,7 +53,7 @@ export const useTimeScale = () => {
   }, [pixelsPerDivision]);
 
   /**
-   * Генерирует массив делений для рендеринга
+   * Generates array of divisions for rendering
    */
   const generateDivisions = useMemo(() => {
     const nearestDivisionMs = findNearestDivision();
@@ -62,7 +62,7 @@ export const useTimeScale = () => {
     
     const divisions = [];
     
-    // Генерируем деления от -divisionsInHalf до +divisionsInHalf от ближайшей
+    // Generate divisions from -divisionsInHalf to +divisionsInHalf from nearest
     for (let i = -divisionsInHalf; i <= divisionsInHalf; i++) {
       const divisionMs = nearestDivisionMs + i * intervalMs;
       const y = getTimeY(divisionMs);

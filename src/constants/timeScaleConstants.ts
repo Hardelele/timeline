@@ -1,45 +1,45 @@
 /**
- * Константы для временной шкалы
+ * Constants for time scale
  */
 
-// Константы для вычисления делений
+// Constants for calculating divisions
 export const TIME_SCALE_CONSTANTS = {
-  // Количество делений по умолчанию для отображения
+  // Default number of divisions to display
   DEFAULT_DIVISIONS_IN_HALF: 10,
   
-  // Минимальное количество делений
+  // Minimum number of divisions
   MIN_DIVISIONS_IN_HALF: 5,
   
-  // Максимальное количество делений
+  // Maximum number of divisions
   MAX_DIVISIONS_IN_HALF: 50,
   
-  // Коэффициент для вычисления количества делений на основе высоты экрана
+  // Factor for calculating number of divisions based on screen height
   DIVISIONS_CALCULATION_FACTOR: 2,
 } as const;
 
-// Сокращения для единиц времени (используется с TimeInterval константами)
+// Abbreviations for time units (used with TimeInterval constants)
 export const TIME_UNITS = {
-  SECOND: 'сек',
-  MINUTE: 'мин',
-  HOUR: 'ч',
-  DAY: 'дн',
-  MONTH: 'мес',
-  YEAR: 'год',
-  CENTURY: 'век',
-  MILLENNIUM: 'тыс',
+  SECOND: 'sec',
+  MINUTE: 'min',
+  HOUR: 'h',
+  DAY: 'd',
+  MONTH: 'mo',
+  YEAR: 'y',
+  CENTURY: 'c',
+  MILLENNIUM: 'k',
 } as const;
 
-// Константы для позиционирования элементов
+// Constants for element positioning
 export const POSITIONING_CONSTANTS = {
-  // Смещение текста относительно засечки
+  // Text offset relative to tick mark
   TEXT_OFFSET_X: 10,
   TEXT_OFFSET_Y: -8,
   
-  // Размеры засечки
-  TICK_LENGTH: 10, // общая длина засечки
-  TICK_HALF_LENGTH: 5, // половина длины засечки
+  // Tick mark dimensions
+  TICK_LENGTH: 10, // total tick length
+  TICK_HALF_LENGTH: 5, // half tick length
   
-  // Размеры по умолчанию
+  // Default sizes
   DEFAULT_FONT_SIZE: 12,
   DEFAULT_STROKE_WIDTH: 1,
 } as const;

@@ -1,8 +1,8 @@
 import { TIME_UNITS } from '../constants/timeScaleConstants';
 
-// ENUM для временных интервалов
+// ENUM for time intervals
 export const TimeInterval = {
-  // Секунды
+  // Seconds
   ONE_SECOND: 1000,
   TWO_SECONDS: 2000,
   FIVE_SECONDS: 5000,
@@ -12,7 +12,7 @@ export const TimeInterval = {
   THIRTY_SECONDS: 30000,
   ONE_MINUTE: 60000,
 
-  // Минуты
+  // Minutes
   TWO_MINUTES: 2 * 60000,
   FIVE_MINUTES: 5 * 60000,
   TEN_MINUTES: 10 * 60000,
@@ -21,14 +21,14 @@ export const TimeInterval = {
   THIRTY_MINUTES: 30 * 60000,
   ONE_HOUR: 60 * 60000,
 
-  // Часы
+  // Hours
   TWO_HOURS: 2 * 60 * 60000,
   FOUR_HOURS: 4 * 60 * 60000,
   SIX_HOURS: 6 * 60 * 60000,
   TWELVE_HOURS: 12 * 60 * 60000,
   ONE_DAY: 24 * 60 * 60000,
 
-  // Дни
+  // Days
   TWO_DAYS: 2 * 24 * 60 * 60000,
   ONE_WEEK: 7 * 24 * 60 * 60000,
   TWO_WEEKS: 14 * 24 * 60 * 60000,
@@ -36,9 +36,9 @@ export const TimeInterval = {
   TWO_MONTHS: 2 * 30 * 24 * 60 * 60000,
   THREE_MONTHS: 3 * 30 * 24 * 60 * 60000,
   SIX_MONTHS: 6 * 30 * 24 * 60 * 60000,
-  ONE_YEAR: 12 * 30 * 24 * 60 * 60000, // 12 месяцев
+  ONE_YEAR: 12 * 30 * 24 * 60 * 60000, // 12 months
 
-  // Годы
+  // Years
   TWO_YEARS: 2 * 12 * 30 * 24 * 60 * 60000,
   FIVE_YEARS: 5 * 12 * 30 * 24 * 60 * 60000,
   TEN_YEARS: 10 * 12 * 30 * 24 * 60 * 60000,
@@ -46,12 +46,12 @@ export const TimeInterval = {
   FIFTY_YEARS: 50 * 12 * 30 * 24 * 60 * 60000,
   ONE_CENTURY: 100 * 12 * 30 * 24 * 60 * 60000,
 
-  // Века
+  // Centuries
   TWO_CENTURIES: 2 * 100 * 12 * 30 * 24 * 60 * 60000,
   FIVE_CENTURIES: 5 * 100 * 12 * 30 * 24 * 60 * 60000,
   ONE_MILLENNIUM: 10 * 100 * 12 * 30 * 24 * 60 * 60000,
   
-  // Тысячелетия
+  // Millennia
   TWO_MILLENNIA: 2 * 1000 * 12 * 30 * 24 * 60 * 60000,
   FIVE_MILLENNIA: 5 * 1000 * 12 * 30 * 24 * 60 * 60000,
   TEN_MILLENNIA: 10 * 1000 * 12 * 30 * 24 * 60 * 60000,
@@ -62,7 +62,7 @@ export type TimeInterval = typeof TimeInterval[keyof typeof TimeInterval];
 export class TimeIntervalService {
   private static instance: TimeIntervalService;
 
-  // Полный список временных интервалов в миллисекундах
+  // Complete list of time intervals in milliseconds
   private readonly timeIntervals = Object.values(TimeInterval).filter(value => typeof value === 'number') as number[];
 
   private currentIntervalIndex: number = 0;
@@ -76,22 +76,22 @@ export class TimeIntervalService {
     return TimeIntervalService.instance;
   }
 
-  // Получить текущий интервал в миллисекундах
+  // Get current interval in milliseconds
   public getCurrentIntervalMs(): number {
     return this.timeIntervals[this.currentIntervalIndex];
   }
 
-  // Получить текущий интервал в секундах
+  // Get current interval in seconds
   public getCurrentIntervalSeconds(): number {
     return this.timeIntervals[this.currentIntervalIndex] / 1000;
   }
 
-  // Получить текущий интервал как ENUM
+  // Get current interval as ENUM
   public getCurrentInterval(): TimeInterval {
     return this.timeIntervals[this.currentIntervalIndex] as TimeInterval;
   }
 
-  // Получить название текущего интервала
+  // Get current interval name
   public getCurrentIntervalName(): string {
     const currentMs = this.getCurrentIntervalMs();
     const intervalName = Object.keys(TimeInterval).find(key => 
@@ -100,21 +100,21 @@ export class TimeIntervalService {
     return intervalName || 'UNKNOWN';
   }
 
-  // Увеличить масштаб (уменьшить интервал)
+  // Zoom in (decrease interval)
   public zoomIn(): void {
     if (this.currentIntervalIndex > 0) {
       this.currentIntervalIndex--;
     }
   }
 
-  // Уменьшить масштаб (увеличить интервал)
+  // Zoom out (increase interval)
   public zoomOut(): void {
     if (this.currentIntervalIndex < this.timeIntervals.length - 1) {
       this.currentIntervalIndex++;
     }
   }
 
-  // Установить конкретный интервал
+  // Set specific interval
   public setInterval(intervalMs: number): void {
     const index = this.timeIntervals.findIndex(interval => interval === intervalMs);
     if (index !== -1) {
@@ -122,7 +122,7 @@ export class TimeIntervalService {
     }
   }
 
-  // Получить следующий интервал
+  // Get next interval
   public getNextInterval(): TimeInterval | null {
     if (this.currentIntervalIndex < this.timeIntervals.length - 1) {
       return this.timeIntervals[this.currentIntervalIndex + 1] as TimeInterval;
@@ -130,7 +130,7 @@ export class TimeIntervalService {
     return null;
   }
 
-  // Получить предыдущий интервал
+  // Get previous interval
   public getPreviousInterval(): TimeInterval | null {
     if (this.currentIntervalIndex > 0) {
       return this.timeIntervals[this.currentIntervalIndex - 1] as TimeInterval;
@@ -138,7 +138,7 @@ export class TimeIntervalService {
     return null;
   }
 
-  // Проверить, нужно ли переключиться на следующий интервал
+  // Check if should switch to next interval
   public shouldSwitchToNextInterval(currentPixelsPerDivision: number): boolean {
     const nextInterval = this.getNextInterval();
     if (!nextInterval) return false;
@@ -146,14 +146,14 @@ export class TimeIntervalService {
     const currentIntervalMs = this.getCurrentIntervalMs();
     const nextIntervalMs = nextInterval;
     
-    // Отношение: currentInterval / nextInterval
+    // Ratio: currentInterval / nextInterval
     const ratio = currentIntervalMs / nextIntervalMs;
-    const thresholdPixels = 40 * ratio; // 40px * отношение (новое значение по умолчанию)
+    const thresholdPixels = 40 * ratio; // 40px * ratio (new default value)
     
     return currentPixelsPerDivision <= thresholdPixels;
   }
 
-  // Проверить, нужно ли переключиться на предыдущий интервал
+  // Check if should switch to previous interval
   public shouldSwitchToPreviousInterval(currentPixelsPerDivision: number): boolean {
     const previousInterval = this.getPreviousInterval();
     if (!previousInterval) return false;
@@ -161,14 +161,14 @@ export class TimeIntervalService {
     const currentIntervalMs = this.getCurrentIntervalMs();
     const previousIntervalMs = previousInterval;
     
-    // Отношение: currentInterval / previousInterval
+    // Ratio: currentInterval / previousInterval
     const ratio = currentIntervalMs / previousIntervalMs;
-    const thresholdPixels = 40 * ratio; // 40px * отношение (новое значение по умолчанию)
+    const thresholdPixels = 40 * ratio; // 40px * ratio (new default value)
     
     return currentPixelsPerDivision >= thresholdPixels;
   }
 
-  // Переключиться на следующий интервал
+  // Switch to next interval
   public switchToNextInterval(): boolean {
     if (this.currentIntervalIndex < this.timeIntervals.length - 1) {
       this.currentIntervalIndex++;
@@ -177,7 +177,7 @@ export class TimeIntervalService {
     return false;
   }
 
-  // Переключиться на предыдущий интервал
+  // Switch to previous interval
   public switchToPreviousInterval(): boolean {
     if (this.currentIntervalIndex > 0) {
       this.currentIntervalIndex--;
@@ -186,49 +186,49 @@ export class TimeIntervalService {
     return false;
   }
 
-  // Получить все доступные интервалы
+  // Get all available intervals
   public getAllIntervals(): number[] {
     return [...this.timeIntervals];
   }
 
-  // Получить текущий индекс
+  // Get current index
   public getCurrentIndex(): number {
     return this.currentIntervalIndex;
   }
 
-  // Форматировать интервал для отображения
+  // Format interval for display
   public formatInterval(intervalMs: number): string {
     const seconds = intervalMs / 1000;
     
     if (seconds < 60) {
-      return `${seconds} сек`;
+      return `${seconds} sec`;
     } else if (seconds < 3600) {
-      return `${seconds / 60} мин`;
+      return `${seconds / 60} min`;
     } else if (seconds < 86400) {
-      return `${seconds / 3600} ч`;
+      return `${seconds / 3600} h`;
     } else if (seconds < 2592000) {
-      return `${seconds / 86400} дн`;
+      return `${seconds / 86400} d`;
     } else if (seconds < 31536000) {
-      return `${seconds / 2592000} мес`;
+      return `${seconds / 2592000} mo`;
     } else if (seconds < 3153600000) {
-      return `${seconds / 31536000} год`;
+      return `${seconds / 31536000} y`;
     } else if (seconds < 31536000000) {
-      return `${seconds / 3153600000} век`;
+      return `${seconds / 3153600000} c`;
     } else {
-      return `${seconds / 31536000000} тыс`;
+      return `${seconds / 31536000000} k`;
     }
   }
 
   /**
-   * Форматирует время в миллисекундах в детализированную строку
-   * @param timeMs - время в миллисекундах
-   * @returns отформатированная строка времени
+   * Formats time in milliseconds into detailed string
+   * @param timeMs - time in milliseconds
+   * @returns formatted time string
    */
   public formatTime(timeMs: number): string {
     const totalSeconds = Math.abs(timeMs) / 1000;
     const isNegative = timeMs < 0;
     
-    // Используем существующие TimeInterval константы и маппинг единиц
+    // Use existing TimeInterval constants and unit mapping
     const MINUTE_SECONDS = TimeInterval.ONE_MINUTE / 1000;
     const HOUR_SECONDS = TimeInterval.ONE_HOUR / 1000;
     const DAY_SECONDS = TimeInterval.ONE_DAY / 1000;
@@ -240,21 +240,21 @@ export class TimeIntervalService {
     const parts: string[] = [];
     let remainingSeconds = totalSeconds;
     
-    // Тысячелетия
+    // Millennia
     if (remainingSeconds >= MILLENNIUM_SECONDS) {
       const millennia = Math.floor(remainingSeconds / MILLENNIUM_SECONDS);
       parts.push(`${millennia} ${TIME_UNITS.MILLENNIUM}`);
       remainingSeconds = remainingSeconds % MILLENNIUM_SECONDS;
     }
     
-    // Века
+    // Centuries
     if (remainingSeconds >= CENTURY_SECONDS) {
       const centuries = Math.floor(remainingSeconds / CENTURY_SECONDS);
       parts.push(`${centuries} ${TIME_UNITS.CENTURY}`);
       remainingSeconds = remainingSeconds % CENTURY_SECONDS;
     }
     
-    // Годы
+    // Years
     if (remainingSeconds >= YEAR_SECONDS) {
       const years = Math.floor(remainingSeconds / YEAR_SECONDS);
       parts.push(`${years} ${TIME_UNITS.YEAR}`);
@@ -268,28 +268,28 @@ export class TimeIntervalService {
       remainingSeconds = remainingSeconds % MONTH_SECONDS;
     }
     
-    // Дни
+    // Days
     if (remainingSeconds >= DAY_SECONDS) {
       const days = Math.floor(remainingSeconds / DAY_SECONDS);
       parts.push(`${days} ${TIME_UNITS.DAY}`);
       remainingSeconds = remainingSeconds % DAY_SECONDS;
     }
     
-    // Часы
+    // Hours
     if (remainingSeconds >= HOUR_SECONDS) {
       const hours = Math.floor(remainingSeconds / HOUR_SECONDS);
       parts.push(`${hours} ${TIME_UNITS.HOUR}`);
       remainingSeconds = remainingSeconds % HOUR_SECONDS;
     }
     
-    // Минуты
+    // Minutes
     if (remainingSeconds >= MINUTE_SECONDS) {
       const minutes = Math.floor(remainingSeconds / MINUTE_SECONDS);
       parts.push(`${minutes} ${TIME_UNITS.MINUTE}`);
       remainingSeconds = remainingSeconds % MINUTE_SECONDS;
     }
     
-    // Секунды
+    // Seconds
     const seconds = Math.floor(remainingSeconds);
     if (seconds > 0 || parts.length === 0) {
       parts.push(`${seconds} ${TIME_UNITS.SECOND}`);
@@ -300,5 +300,5 @@ export class TimeIntervalService {
   }
 }
 
-// Экспортируем singleton instance
+// Export singleton instance
 export const timeIntervalService = TimeIntervalService.getInstance();

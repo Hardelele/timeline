@@ -15,12 +15,12 @@ export class DragService {
     return DragService.instance;
   }
 
-  // Устанавливаем callback для уведомления об изменении состояния перетаскивания
+  // Set callback for drag state change notifications
   public setOnDragStateChange(callback: (isDragging: boolean) => void): void {
     this.onDragStateChange = callback;
   }
 
-  // Обработчик начала перетаскивания
+  // Mouse down handler for drag start
   public handleMouseDown = (e: any): void => {
     const stage = e.target.getStage();
     const pos = stage.getPointerPosition();
@@ -29,7 +29,7 @@ export class DragService {
     this.onDragStateChange?.(true);
   };
 
-  // Обработчик движения мыши при перетаскивании
+  // Mouse move handler during drag
   public handleMouseMove = (e: any): void => {
     if (!this.isDragging || !this.lastPointerPosition) return;
 
@@ -37,31 +37,31 @@ export class DragService {
     const pos = stage.getPointerPosition();
     const deltaY = pos.y - this.lastPointerPosition.y;
     
-    // Получаем текущее состояние и обновляем offsetMs
+    // Get current state and update offsetMs
     const { offsetMs, setOffsetMs, getTimePerPixel } = useTimelineStore.getState();
     const timePerPixel = getTimePerPixel();
-    setOffsetMs(offsetMs + deltaY * timePerPixel); // Убираем инверсию для естественного движения
+    setOffsetMs(offsetMs + deltaY * timePerPixel); // Remove inversion for natural movement
     
     this.lastPointerPosition = pos;
   };
 
-  // Обработчик окончания перетаскивания
+  // Mouse up handler for drag end
   public handleMouseUp = (): void => {
     this.isDragging = false;
     this.lastPointerPosition = null;
     this.onDragStateChange?.(false);
   };
 
-  // Обработчик выхода мыши за границы (тоже останавливает перетаскивание)
+  // Mouse leave handler (also stops dragging)
   public handleMouseLeave = (): void => {
     this.handleMouseUp();
   };
 
-  // Получить текущее состояние перетаскивания
+  // Get current drag state
   public getIsDragging(): boolean {
     return this.isDragging;
   }
 }
 
-// Экспортируем singleton instance
+// Export singleton instance
 export const dragService = DragService.getInstance();

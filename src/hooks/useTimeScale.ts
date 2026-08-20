@@ -67,9 +67,5 @@ export const useTimeScale = () => {
     return divisions;
   }, [findNearestDivision, intervalMs, getDivisionsCount, getTimeY, centerX]);
 
-  return {
-    divisions: generateDivisions,
-    findNearestDivision,
-    getDivisionsCount
-  };
+  return { divisions: generateDivisions };
 };

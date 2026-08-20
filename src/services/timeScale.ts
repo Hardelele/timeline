@@ -1,7 +1,10 @@
 import { TIME_UNITS } from '../constants/timeScaleConstants';
 
-// ENUM for time intervals
-export const TimeInterval = {
+/**
+ * Named steps of the built-in ladder. Not exported: consumers take the
+ * ordered table below, and the names exist to keep this list readable.
+ */
+const TimeInterval = {
   // Seconds
   ONE_SECOND: 1000,
   TWO_SECONDS: 2000,
@@ -56,8 +59,6 @@ export const TimeInterval = {
   FIVE_MILLENNIA: 5 * 1000 * 12 * 30 * 24 * 60 * 60000,
   TEN_MILLENNIA: 10 * 1000 * 12 * 30 * 24 * 60 * 60000,
 } as const;
-
-export type TimeInterval = typeof TimeInterval[keyof typeof TimeInterval];
 
 /**
  * Ladder of scale steps, ascending. Handed to the store as a parameter rather

@@ -6,15 +6,9 @@ interface TimeDivisionProps {
   x: number;
   y: number;
   text: string;
-  fontSize?: number;
 }
 
-export const TimeDivision: React.FC<TimeDivisionProps> = ({ 
-  x, 
-  y, 
-  text, 
-  fontSize = POSITIONING_CONSTANTS.DEFAULT_FONT_SIZE 
-}) => {
+export const TimeDivision: React.FC<TimeDivisionProps> = ({ x, y, text }) => {
   return (
     <>
       {/* Text with time label */}
@@ -22,16 +16,16 @@ export const TimeDivision: React.FC<TimeDivisionProps> = ({
         x={x + POSITIONING_CONSTANTS.TEXT_OFFSET_X}
         y={y + POSITIONING_CONSTANTS.TEXT_OFFSET_Y}
         text={text}
-        fontSize={fontSize}
+        fontSize={POSITIONING_CONSTANTS.DEFAULT_FONT_SIZE}
         fill="black"
       />
-      
+
       {/* Small tick mark */}
       <Line
         points={[
-          x - POSITIONING_CONSTANTS.TICK_HALF_LENGTH, 
-          y, 
-          x + POSITIONING_CONSTANTS.TICK_HALF_LENGTH, 
+          x - POSITIONING_CONSTANTS.TICK_HALF_LENGTH,
+          y,
+          x + POSITIONING_CONSTANTS.TICK_HALF_LENGTH,
           y
         ]}
         stroke="black"

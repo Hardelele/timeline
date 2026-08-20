@@ -1,30 +1,26 @@
 import { useCallback } from 'react';
-import { useTimelineStore } from '../stores/timelineStore';
-import { screenService } from '../services/screenService';
+import { useTimelineStore } from '../stores/timelineStoreContext';
+import { getCenter, getTimeDivisionY, getTimePerPixel, getZeroTimeY } from '../services/screenGeometry';
 
 /**
  * Hook for calculating Y-coordinate of any time on timeline
  * @returns Function that takes timeMs and returns Y-coordinate
  */
 export const useTimeY = () => {
-  const { 
-    pixelsPerDivision, 
-    getCurrentIntervalMs, 
-    offsetMs, 
-    getTimePerPixel 
-  } = useTimelineStore();
-  
-  const { y: centerY } = screenService.getCenter();
+  const pixelsPerDivision = useTimelineStore((s) => s.pixelsPerDivision);
+  const intervalMs = useTimelineStore((s) => s.currentInterval);
+  const offsetMs = useTimelineStore((s) => s.offsetMs);
+  const canvasHeight = useTimelineStore((s) => s.canvasHeight);
 
   return useCallback((timeMs: number): number => {
     // Calculate positioning parameters
-    const intervalMs = getCurrentIntervalMs();
-    const timePerPixel = getTimePerPixel();
+    const { y: centerY } = getCenter(0, canvasHeight);
+    const timePerPixel = getTimePerPixel(intervalMs, pixelsPerDivision);
     const offsetPixels = offsetMs / timePerPixel;
-    const zeroTimeY = screenService.getZeroTimeY(centerY, offsetPixels);
-    
+    const zeroTimeY = getZeroTimeY(centerY, offsetPixels);
+
     // Calculate Y-coordinate for time
     const divisionIndex = timeMs / intervalMs;
-    return screenService.getTimeDivisionY(zeroTimeY, divisionIndex, pixelsPerDivision);
-  }, [pixelsPerDivision, offsetMs, getCurrentIntervalMs, getTimePerPixel, centerY]);
+    return getTimeDivisionY(zeroTimeY, divisionIndex, pixelsPerDivision);
+  }, [pixelsPerDivision, intervalMs, offsetMs, canvasHeight]);
 };

@@ -60,21 +60,10 @@ export const TimeInterval = {
 export type TimeInterval = typeof TimeInterval[keyof typeof TimeInterval];
 
 export class TimeIntervalService {
-  private static instance: TimeIntervalService;
-
   // Complete list of time intervals in milliseconds
   private readonly timeIntervals = Object.values(TimeInterval).filter(value => typeof value === 'number') as number[];
 
   private currentIntervalIndex: number = 0;
-
-  private constructor() {}
-
-  public static getInstance(): TimeIntervalService {
-    if (!TimeIntervalService.instance) {
-      TimeIntervalService.instance = new TimeIntervalService();
-    }
-    return TimeIntervalService.instance;
-  }
 
   // Get current interval in milliseconds
   public getCurrentIntervalMs(): number {
@@ -219,12 +208,23 @@ export class TimeIntervalService {
     }
   }
 
-  /**
-   * Formats time in milliseconds into detailed string
-   * @param timeMs - time in milliseconds
-   * @returns formatted time string
-   */
-  public formatTime(timeMs: number): string {
+}
+
+/**
+ * Creates a scale tracker owned by a single timeline instance.
+ *
+ * Deliberately not a singleton: two timelines on one page must be able to sit
+ * at different zoom levels, and tests must not inherit each other's state.
+ */
+export const createTimeIntervalService = (): TimeIntervalService => new TimeIntervalService();
+
+/**
+ * Formats time in milliseconds into a detailed string.
+ *
+ * A free function rather than a method: formatting depends only on its
+ * argument, never on which scale step a timeline currently sits at.
+ */
+export function formatTime(timeMs: number): string {
     const totalSeconds = Math.abs(timeMs) / 1000;
     const isNegative = timeMs < 0;
     
@@ -297,8 +297,4 @@ export class TimeIntervalService {
     
     const result = parts.join(' ');
     return isNegative ? `-${result}` : result;
-  }
 }
-
-// Export singleton instance
-export const timeIntervalService = TimeIntervalService.getInstance();

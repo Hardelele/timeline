@@ -1,30 +1,43 @@
 import { createStore } from 'zustand/vanilla';
 import type { StoreApi } from 'zustand/vanilla';
-import { createTimeIntervalService, TimeInterval } from '../services/timeIntervalService';
+import {
+  DEFAULT_PIXELS_PER_DIVISION,
+  DEFAULT_TIME_INTERVALS,
+  resolveScaleIndex,
+} from '../services/timeScale';
 
-// Constants
-const DEFAULT_PIXELS_PER_DIVISION = 40; // default pixels per division
 const MIN_PIXELS_PER_DIVISION = 10;
 const MAX_PIXELS_PER_DIVISION = 200;
 
-export interface TimelineState {
+/**
+ * Where the camera is pointing — not what it is looking at.
+ *
+ * Deliberately named "viewport": this state is per component instance, so a
+ * document (events, lanes, branches) must NOT live here. Two views of the same
+ * timeline have to show the same events while sitting at different zoom levels.
+ */
+export interface TimelineViewportState {
   // Main timeline parameters
   offsetMs: number; // offset in milliseconds
   pixelsPerDivision: number; // pixels per division (can be 80, 40, etc.)
-  currentInterval: TimeInterval; // current time interval, in milliseconds
+
+  /** Ladder of scale steps, ascending. A parameter, not a global table. */
+  intervals: readonly number[];
+  /** Index into `intervals`: the single home of the current scale step. */
+  intervalIndex: number;
 
   // Canvas geometry, kept here so that every consumer re-renders on resize
   canvasWidth: number;
   canvasHeight: number;
 
-  // Interaction
-  isDragging: boolean;
+  /** Pointer Y where the current drag was last sampled; null when not dragging. */
+  dragAnchorY: number | null;
 
   // Actions for state changes
   setOffsetMs: (offsetMs: number) => void;
   setPixelsPerDivision: (pixelsPerDivision: number) => void;
   setCanvasSize: (width: number, height: number) => void;
-  setDragging: (isDragging: boolean) => void;
+  setDragAnchorY: (dragAnchorY: number | null) => void;
 
   // Actions for zooming
   smoothZoom: (deltaPixels: number) => void; // smooth zooming
@@ -33,59 +46,61 @@ export interface TimelineState {
 export interface CreateTimelineStoreOptions {
   canvasWidth?: number;
   canvasHeight?: number;
+  offsetMs?: number;
+  pixelsPerDivision?: number;
+  /** Scale ladder to use. Defaults to the built-in seconds-to-millennia table. */
+  intervals?: readonly number[];
+  /** Scale step to start at, as an index into `intervals`. */
+  intervalIndex?: number;
 }
 
+/** Milliseconds of the current division. */
+export const currentIntervalMs = (state: TimelineViewportState): number =>
+  state.intervals[state.intervalIndex];
+
+/** Whether a drag is in progress. Derived — there is no separate flag to desync. */
+export const isDragging = (state: TimelineViewportState): boolean => state.dragAnchorY !== null;
+
 /**
- * Creates a timeline store owned by a single Timeline component.
+ * Creates the viewport state owned by a single Timeline component.
  *
- * Previously the store was a module-level singleton and the scale, canvas size
- * and drag state lived on three more singletons in ../services. Two timelines
- * on one page therefore shared one zoom level, one canvas size and one drag
- * flag. Everything mutable now hangs off this factory, so each component
- * instance gets its own state and tests get a fresh store per case.
+ * Previously this store was a module-level singleton and three more singletons
+ * in ../services held the canvas size, the drag state and the scale step. Two
+ * timelines on one page therefore shared all of it. Everything mutable now
+ * hangs off this factory, so each instance gets its own state and tests get a
+ * fresh store per case.
  */
 export const createTimelineStore = (
   options: CreateTimelineStoreOptions = {}
-): StoreApi<TimelineState> => {
-  // Owned by this store: the scale tracker knows which step of the interval
-  // table the timeline currently sits at.
-  const intervals = createTimeIntervalService();
+): StoreApi<TimelineViewportState> => {
+  const intervals = options.intervals ?? DEFAULT_TIME_INTERVALS;
 
-  return createStore<TimelineState>((set, get) => ({
+  return createStore<TimelineViewportState>((set, get) => ({
     // Initial values
-    offsetMs: 0, // offset in milliseconds
-    pixelsPerDivision: DEFAULT_PIXELS_PER_DIVISION, // pixels per division
-    currentInterval: intervals.getCurrentInterval(), // start with 1 second
+    offsetMs: options.offsetMs ?? 0, // offset in milliseconds
+    pixelsPerDivision: options.pixelsPerDivision ?? DEFAULT_PIXELS_PER_DIVISION,
+
+    intervals,
+    intervalIndex: options.intervalIndex ?? 0, // start with the finest step
 
     canvasWidth: options.canvasWidth ?? 0,
     canvasHeight: options.canvasHeight ?? 0,
 
-    isDragging: false,
+    dragAnchorY: null,
 
     // Actions
     setOffsetMs: (offsetMs) => set({ offsetMs }),
 
     setPixelsPerDivision: (pixelsPerDivision) => {
-      // Check if need to switch to another interval
-      if (intervals.shouldSwitchToNextInterval(pixelsPerDivision) && intervals.switchToNextInterval()) {
-        // Switched to next interval, reset pixels to default value
-        set({
-          pixelsPerDivision: DEFAULT_PIXELS_PER_DIVISION,
-          currentInterval: intervals.getCurrentInterval(),
-        });
+      const { intervalIndex } = get();
+      const nextIndex = resolveScaleIndex(intervalIndex, pixelsPerDivision, intervals);
+
+      if (nextIndex !== intervalIndex) {
+        // Switched step: density restarts from the default for the new one
+        set({ intervalIndex: nextIndex, pixelsPerDivision: DEFAULT_PIXELS_PER_DIVISION });
         return;
       }
 
-      if (intervals.shouldSwitchToPreviousInterval(pixelsPerDivision) && intervals.switchToPreviousInterval()) {
-        // Switched to previous interval, reset pixels to default value
-        set({
-          pixelsPerDivision: DEFAULT_PIXELS_PER_DIVISION,
-          currentInterval: intervals.getCurrentInterval(),
-        });
-        return;
-      }
-
-      // If no switching occurred, just update pixels
       set({ pixelsPerDivision });
     },
 
@@ -96,22 +111,18 @@ export const createTimelineStore = (
       set({ canvasWidth: width, canvasHeight: height });
     },
 
-    setDragging: (isDragging) => {
-      if (get().isDragging === isDragging) return;
-
-      set({ isDragging });
-    },
+    setDragAnchorY: (dragAnchorY) => set({ dragAnchorY }),
 
     // Smooth zooming (e.g., with mouse wheel)
     smoothZoom: (deltaPixels) => {
       const { pixelsPerDivision, setPixelsPerDivision } = get();
-      const next = Math.max(
-        MIN_PIXELS_PER_DIVISION,
-        Math.min(MAX_PIXELS_PER_DIVISION, pixelsPerDivision + deltaPixels)
-      );
 
-      // Use setPixelsPerDivision which will automatically check interval switching
-      setPixelsPerDivision(next);
+      setPixelsPerDivision(
+        Math.max(
+          MIN_PIXELS_PER_DIVISION,
+          Math.min(MAX_PIXELS_PER_DIVISION, pixelsPerDivision + deltaPixels)
+        )
+      );
     },
   }));
 };

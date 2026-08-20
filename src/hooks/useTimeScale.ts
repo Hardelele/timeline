@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useTimelineStore } from '../stores/timelineStoreContext';
-import { formatTime } from '../services/timeIntervalService';
-import { getCenter } from '../services/screenGeometry';
+import { currentIntervalMs } from '../stores/createTimelineStore';
+import { formatTime } from '../services/timeScale';
 import { useTimeY } from './useTimeY';
 import { TIME_SCALE_CONSTANTS } from '../constants/timeScaleConstants';
 
@@ -12,12 +12,11 @@ import { TIME_SCALE_CONSTANTS } from '../constants/timeScaleConstants';
 export const useTimeScale = () => {
   const offsetMs = useTimelineStore((s) => s.offsetMs);
   const pixelsPerDivision = useTimelineStore((s) => s.pixelsPerDivision);
-  const intervalMs = useTimelineStore((s) => s.currentInterval);
+  const intervalMs = useTimelineStore(currentIntervalMs);
   const canvasWidth = useTimelineStore((s) => s.canvasWidth);
   const canvasHeight = useTimelineStore((s) => s.canvasHeight);
 
-  // Get screen center
-  const { x: centerX } = getCenter(canvasWidth, 0);
+  const centerX = canvasWidth / 2;
 
   // Hook for calculating time Y-coordinate
   const getTimeY = useTimeY();
@@ -25,9 +24,10 @@ export const useTimeScale = () => {
   /**
    * Finds nearest tick mark to offsetMs
    */
-  const findNearestDivision = useCallback(() => {
-    return Math.round(offsetMs / intervalMs) * intervalMs;
-  }, [offsetMs, intervalMs]);
+  const findNearestDivision = useCallback(
+    () => Math.round(offsetMs / intervalMs) * intervalMs,
+    [offsetMs, intervalMs]
+  );
 
   /**
    * Calculates number of divisions to display
@@ -70,7 +70,6 @@ export const useTimeScale = () => {
   return {
     divisions: generateDivisions,
     findNearestDivision,
-    formatTime,
     getDivisionsCount
   };
 };

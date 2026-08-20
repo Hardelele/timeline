@@ -1,5 +1,6 @@
 export { Timeline } from './Timeline';
 export type { TimelineProps } from './Timeline';
-export { TimeScale } from './TimeScale';
 export { TimeDivision } from './TimeDivision';
-export { CoordinateAxes } from './CoordinateAxes';
+
+// TimeScale and CoordinateAxes are intentionally not exported: they read the
+// enclosing Timeline's store and throw when rendered on their own.

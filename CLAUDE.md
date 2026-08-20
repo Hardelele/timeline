@@ -13,11 +13,11 @@
 
 ## Раскладка
 
-- `src/timeline/` — компоненты канвы: `Timeline`, `TimeScale`, `TimeDivision`, `CoordinateAxes`; публичный экспорт через `src/timeline/index.ts`.
-- `src/services/` — чистая логика без React: перевод времени в координаты (`timeIntervalService`), drag (`dragService`), размеры экрана (`screenService`).
-- `src/hooks/` — связка состояния и сервисов (`useTimeScale`, `useTimeY`).
-- `src/stores/` — Zustand-стор шкалы (`timelineStore`).
-- `src/constants/timeScaleConstants.ts` — таблица интервалов от секунд до тысячелетий. Это контракт шкалы: правки здесь меняют поведение зума на всех уровнях, менять только осознанно.
+- `src/timeline/` — компоненты канвы: `Timeline`, `TimeScale`, `TimeDivision`, `CoordinateAxes`. Наружу через `src/timeline/index.ts` отдаются только `Timeline` и `TimeDivision`: остальные читают стор объемлющего `Timeline` и сами по себе не рендерятся.
+- `src/services/` — чистая логика без React и без состояния: таблица ступеней масштаба и форматирование подписей (`timeScale`), перевод времени в координату (`screenGeometry`), drag (`dragController` — фабрика на экземпляр, состояние в переданном сторе).
+- `src/hooks/` — связка стора и чистых функций (`useTimeScale`, `useTimeY`). Арифметика живёт в `services`, хуки — тонкие обёртки, чтобы её можно было тестировать без рендера.
+- `src/stores/` — состояние вида (`createTimelineStore` + контекст в `timelineStoreContext`). Стор создаётся на каждый экземпляр `Timeline`, глобальных синглтонов в проекте нет. Тип называется `TimelineViewportState` намеренно: это про то, куда смотрит камера. Документ (события, дорожки, ветвление линий) сюда класть нельзя — два вида одного таймлайна обязаны показывать одни и те же события.
+- `src/constants/timeScaleConstants.ts` — константы отрисовки делений. Сама таблица интервалов от секунд до тысячелетий — в `services/timeScale.ts` и передаётся в стор параметром: это контракт шкалы, правки меняют поведение зума на всех уровнях.
 - `src/pages/` — страницы роутера.
 
 ## Проверка

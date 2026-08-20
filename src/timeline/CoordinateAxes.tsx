@@ -1,9 +1,15 @@
 import React from 'react';
 import { Line } from 'react-konva';
 import { screenService } from '../services/screenService';
-import { TimeScale } from './TimeScale';
 import { useTimeY } from '../hooks/useTimeY';
 
+/**
+ * Coordinate axes only.
+ *
+ * The time scale is rendered by Timeline as a sibling, not from here:
+ * nesting it made the whole scale draw twice whenever both showAxes and
+ * showTimeScale were enabled, which is the default.
+ */
 export const CoordinateAxes: React.FC = () => {
   // Get dimensions and center from service
   const { width: canvasWidth, height: canvasHeight } = screenService.getCanvasSize();
@@ -30,9 +36,6 @@ export const CoordinateAxes: React.FC = () => {
         stroke="#999"
         strokeWidth={0.5}
       />
-      
-      {/* Time scale with tick marks */}
-      <TimeScale />
     </>
   );
 };

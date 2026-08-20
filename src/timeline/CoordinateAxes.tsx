@@ -1,6 +1,7 @@
 import React from 'react';
 import { Line } from 'react-konva';
-import { screenService } from '../services/screenService';
+import { useTimelineStore } from '../stores/timelineStoreContext';
+import { getCenter } from '../services/screenGeometry';
 import { useTimeY } from '../hooks/useTimeY';
 
 /**
@@ -11,13 +12,14 @@ import { useTimeY } from '../hooks/useTimeY';
  * showTimeScale were enabled, which is the default.
  */
 export const CoordinateAxes: React.FC = () => {
-  // Get dimensions and center from service
-  const { width: canvasWidth, height: canvasHeight } = screenService.getCanvasSize();
-  const { x: centerX } = screenService.getCenter();
-  
+  // Canvas size comes from the store, so a resize re-renders the axes
+  const canvasWidth = useTimelineStore((s) => s.canvasWidth);
+  const canvasHeight = useTimelineStore((s) => s.canvasHeight);
+  const { x: centerX } = getCenter(canvasWidth, canvasHeight);
+
   // Hook for calculating time Y-coordinate
   const getTimeY = useTimeY();
-  
+
   // Y-coordinate of zero time point
   const zeroTimeY = getTimeY(0);
 
@@ -29,7 +31,7 @@ export const CoordinateAxes: React.FC = () => {
         stroke="#999"
         strokeWidth={0.5}
       />
-      
+
       {/* Y-axis - vertical line */}
       <Line
         points={[centerX, 0, centerX, canvasHeight]}

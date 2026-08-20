@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Stage, Layer } from 'react-konva';
 import type { KonvaEventObject } from 'konva/lib/Node';
 import { CoordinateAxes } from './CoordinateAxes';
 import { TimeScale } from './TimeScale';
 import { createDragController } from '../services/dragController';
-import { createTimelineStore } from '../stores/createTimelineStore';
-import { TimelineStoreProvider } from '../stores/TimelineStoreProvider';
+import { createTimelineStore, isDragging } from '../stores/createTimelineStore';
+import { TimelineStoreContext } from '../stores/timelineStoreContext';
 import { useStore } from 'zustand';
 
 export interface TimelineProps {
@@ -33,9 +33,9 @@ export interface TimelineProps {
  * Reusable timeline component
  * Provides interactive timeline with zoom and drag capabilities
  *
- * Every instance owns its state: the store, the scale tracker and the drag
- * controller are created here rather than imported as singletons, so several
- * timelines can live on one page without sharing zoom, size or drag state.
+ * Every instance owns its state: the viewport store and the drag controller are
+ * created here rather than imported as singletons, so several timelines can
+ * live on one page without sharing zoom, size or drag state.
  */
 export const Timeline: React.FC<TimelineProps> = ({
   width,
@@ -48,27 +48,33 @@ export const Timeline: React.FC<TimelineProps> = ({
   showTimeScale = true,
   containerStyle = {},
 }) => {
-  const [store] = useState(() =>
-    createTimelineStore({
-      canvasWidth: width ?? window.innerWidth,
-      canvasHeight: height ?? window.innerHeight,
-    })
+  // A missing dimension falls back to the window; an explicit one always wins,
+  // including an explicit 0. Kept in one place so the initial size and the
+  // resize handler cannot drift apart.
+  const measure = useCallback(
+    () => ({
+      width: width ?? window.innerWidth,
+      height: height ?? window.innerHeight,
+    }),
+    [width, height]
   );
+
+  const [store] = useState(() => {
+    const { width: canvasWidth, height: canvasHeight } = measure();
+    return createTimelineStore({ canvasWidth, canvasHeight });
+  });
 
   const dragController = useMemo(() => createDragController(store), [store]);
 
   const canvasWidth = useStore(store, (s) => s.canvasWidth);
   const canvasHeight = useStore(store, (s) => s.canvasHeight);
-  const isDragging = useStore(store, (s) => s.isDragging);
+  const dragging = useStore(store, isDragging);
   const offsetMs = useStore(store, (s) => s.offsetMs);
 
   // Update canvas dimensions when props or window size changes
   useEffect(() => {
     const updateSize = () => {
-      const newSize = {
-        width: width ?? window.innerWidth,
-        height: height ?? window.innerHeight,
-      };
+      const newSize = measure();
 
       store.getState().setCanvasSize(newSize.width, newSize.height);
 
@@ -78,12 +84,12 @@ export const Timeline: React.FC<TimelineProps> = ({
 
     updateSize();
 
-    // Add listener only if dimensions are not explicitly set
-    if (!width || !height) {
+    // Follow the window only for dimensions the caller left to us
+    if (width === undefined || height === undefined) {
       window.addEventListener('resize', updateSize);
       return () => window.removeEventListener('resize', updateSize);
     }
-  }, [width, height, onResize, store]);
+  }, [width, height, measure, onResize, store]);
 
   // Notify parent component about offset change
   useEffect(() => {
@@ -106,7 +112,7 @@ export const Timeline: React.FC<TimelineProps> = ({
     width: canvasWidth,
     height: canvasHeight,
     backgroundColor,
-    cursor: isDragging ? 'grabbing' : 'grab',
+    cursor: dragging ? 'grabbing' : 'grab',
     ...containerStyle,
   };
 
@@ -121,12 +127,12 @@ export const Timeline: React.FC<TimelineProps> = ({
         onMouseLeave={dragController.handleMouseLeave}
         onWheel={handleWheel}
       >
-        <TimelineStoreProvider store={store}>
+        <TimelineStoreContext.Provider value={store}>
           <Layer>
             {showAxes && <CoordinateAxes />}
             {showTimeScale && <TimeScale />}
           </Layer>
-        </TimelineStoreProvider>
+        </TimelineStoreContext.Provider>
       </Stage>
     </div>
   );
